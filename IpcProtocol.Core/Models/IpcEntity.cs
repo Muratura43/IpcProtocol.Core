@@ -2,25 +2,24 @@
 
 namespace IpcProtocol.Core.Models
 {
-    public class IpcEntity
+    public class IpcEntity<T> where T : new()
     {
         public IpcHeader Header { get; set; }
-        public string Command { get; set; }
-        public object Payload { get; set; }
+        public T Entity { get; set; }
 
         public IpcEntity()
         {
             Header = new IpcHeader(Guid.NewGuid(), 0);
         }
 
-        public IpcEntity(string command, object payload = null)
+        public IpcEntity(T entity)
             : this()
         {
-            Command = command;
+            Entity = entity;
         }
 
-        public IpcEntity(string command, object payload, Guid callbackId, int port)
-            : this(command, payload)
+        public IpcEntity(T entity, Guid callbackId, int port)
+            : this(entity)
         {
             Header = new IpcHeader(callbackId, port);
         }

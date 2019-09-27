@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace IpcProtocol.Core
 {
-    internal class IpcClient
+    internal class IpcClient<T> where T : new()
     {
         private readonly int _portNumber;
 
@@ -17,7 +17,7 @@ namespace IpcProtocol.Core
             _portNumber = portNumber;
         }
 
-        public Task Send(IpcEntity data)
+        public Task Send(IpcEntity<T> data)
         {
             return Task.Factory.StartNew(() =>
             {
