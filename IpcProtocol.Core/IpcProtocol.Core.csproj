@@ -2,6 +2,15 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
+    <Authors>Muratura43</Authors>
+    <Company>Heimdal Security</Company>
+    <Product />
+    <Description>Provides a simple IPC over TCP</Description>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <RepositoryUrl>https://github.com/Muratura43/IpcProtocol.Core</RepositoryUrl>
+    <RepositoryType>GitHub</RepositoryType>
+    <PackageTags>Ipc</PackageTags>
+    <PackageLicenseUrl>https://github.com/Muratura43/IpcProtocol.Core/blob/master/LICENSE</PackageLicenseUrl>
   </PropertyGroup>
 
   <ItemGroup>
