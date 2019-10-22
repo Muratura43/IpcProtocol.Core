@@ -11,6 +11,7 @@ namespace IpcProtocol.Core
     internal class IpcClient<T> where T : new()
     {
         private readonly int _portNumber;
+        private volatile object _sendLock = new object();
 
         internal IpcClient(int portNumber)
         {
@@ -23,13 +24,23 @@ namespace IpcProtocol.Core
             {
                 try
                 {
-                    using (TcpClient socket = new TcpClient())
+                    lock (_sendLock)
                     {
-                        socket.Connect(new IPEndPoint(IPAddress.Loopback, _portNumber));
-                        var dataToSend = ProcessDataForSending(data);
-                        socket.Client.Send(dataToSend);
+                        using (TcpClient socket = new TcpClient())
+                        {
+                            socket.Connect(new IPEndPoint(IPAddress.Loopback, _portNumber));
 
-                        socket.Close();
+                            string serializedData = JsonConvert.SerializeObject(data);
+                            byte[] dataToSend = Encoding.UTF8.GetBytes(serializedData);
+                            byte[] bufferSize = Encoding.UTF8.GetBytes(dataToSend.Length.ToString().PadLeft(4));
+
+                            var result = new byte[bufferSize.Length + dataToSend.Length];
+                            Array.Copy(bufferSize, result, bufferSize.Length);
+                            Array.Copy(dataToSend, 0, result, bufferSize.Length, dataToSend.Length);
+
+                            socket.Client.Send(result);
+                            socket.Close();
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -37,14 +48,6 @@ namespace IpcProtocol.Core
                     Console.WriteLine($"[ERROR] IpcClient Send: {ex?.Message}");
                 }
             });
-        }
-
-        private byte[] ProcessDataForSending(object data)
-        {
-            string serializedData = JsonConvert.SerializeObject(data);
-            byte[] processedData = Encoding.UTF8.GetBytes(serializedData);
-
-            return processedData;
         }
     }
 }

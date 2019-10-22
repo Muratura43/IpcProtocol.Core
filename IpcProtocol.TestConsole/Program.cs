@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using IpcProtocol.Core;
 
 namespace IpcProtocol.TestConsole
@@ -8,36 +7,22 @@ namespace IpcProtocol.TestConsole
     {
         static void Main(string[] args)
         {
-            var protocol = new Protocol<Entity>(new List<int>() { 8021, 8023, 8024 }, 8022);
-
-            // Listen test
-            protocol.Listen((e) =>
+            var protocol2 = new Protocol<Entity>(8021, 8023);
+            protocol2.Send(new Entity()
             {
-                Console.WriteLine("Received: " + e.Command);
+                Command = "test-send2",
+                Payload = null
+            }).SetCallback((e) =>
+            {
+                Console.WriteLine(e.Command);
             });
 
-            // Send test
-            protocol.Send(new Entity()
+            var protocol3 = new Protocol<Entity>(8021, 8024);
+            protocol2.Send(new Entity()
             {
-                Command = "test-send",
+                Command = "asdf",
                 Payload = null
-            }, 8021).SetCallback((e) =>
-            {
-                // Callback test
-                Console.WriteLine("Callbacked: " + e.Command);
             });
-
-            protocol.Send(new Entity()
-            {
-                Command = "test-send",
-                Payload = null
-            }, 8023);
-
-            protocol.Send(new Entity()
-            {
-                Command = "test-send",
-                Payload = null
-            }, 8024);
 
             Console.ReadLine();
         }
