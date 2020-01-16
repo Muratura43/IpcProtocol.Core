@@ -10,11 +10,6 @@ namespace IpcProtocol.TestConsole
         {
             var protocol2 = new Protocol<Entity>(8021, 8023, new ProtocolEncryptor());
 
-            protocol2.Listen((e) =>
-            {
-                Console.WriteLine("Received: " + e.Command);
-            });
-
             protocol2.Send(new Entity()
             {
                 Command = "test-send2",

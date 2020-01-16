@@ -3,7 +3,6 @@ using Newtonsoft.Json;
 using System;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace IpcProtocol.Core
@@ -40,14 +39,10 @@ namespace IpcProtocol.Core
                                 serializedData = _encryptor.Encrypt(serializedData);
                             }
 
-                            byte[] dataToSend = Encoding.UTF8.GetBytes(serializedData);
-                            byte[] bufferSize = Encoding.UTF8.GetBytes(dataToSend.Length.ToString().PadLeft(4));
+                            var bufferHead = Convert.FromBase64String(serializedData).Length.ToString().PadLeft(4, '0');
+                            var dataToSend = Convert.FromBase64String(bufferHead + serializedData);
 
-                            var result = new byte[bufferSize.Length + dataToSend.Length];
-                            Array.Copy(bufferSize, result, bufferSize.Length);
-                            Array.Copy(dataToSend, 0, result, bufferSize.Length, dataToSend.Length);
-
-                            socket.Client.Send(result);
+                            socket.Client.Send(dataToSend);
                             socket.Close();
                         }
                     }

@@ -9,7 +9,7 @@ namespace IpcProtocol.TestServer
     {
         static void Main(string[] args)
         {
-            var protocol = new Protocol<Entity>(new List<int>() { 8023, 8024 }, 8022, new ProtocolEncryptor());
+            var protocol = new Protocol<Entity>(new List<int>() { 8021, 8024 }, 8022, new ProtocolEncryptor());
 
             // Listen test
             protocol.Listen((e) =>

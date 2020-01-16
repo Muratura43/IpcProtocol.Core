@@ -26,7 +26,7 @@ namespace IpcProtocol.Core
             _encryptor = encryptor;
 
             _serverPort = serverPort;
-            _server = new IpcServer(serverPort);
+            _server = new IpcServer(serverPort, _encryptor);
 
             _multiClients = new Dictionary<int, IpcClient<T>>();
             _callbacks = new Dictionary<Guid, Action<T>>();
@@ -35,7 +35,7 @@ namespace IpcProtocol.Core
         public Protocol(int clientPort, int serverPort, IProtocolEncryptor encryptor = null) 
             : this(serverPort, encryptor)
         {
-            _multiClients.Add(clientPort, new IpcClient<T>(clientPort));
+            _multiClients.Add(clientPort, new IpcClient<T>(clientPort, _encryptor));
             _clientPort = clientPort;
         }
 
@@ -44,7 +44,7 @@ namespace IpcProtocol.Core
         {
             foreach (var port in clientPorts)
             {
-                var client = new IpcClient<T>(port);
+                var client = new IpcClient<T>(port, _encryptor);
                 _multiClients.Add(port, client);
 
                 _clientPort = port;
