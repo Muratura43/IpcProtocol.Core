@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\IpcProtocol.Core\IpcProtocol.Core.csproj" />
+    <ProjectReference Include="..\IpcProtocol.Domain\IpcProtocol.Domain.csproj" />
   </ItemGroup>
 
 </Project>
