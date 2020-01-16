@@ -13,9 +13,12 @@ namespace IpcProtocol.Core
         private readonly int _portNumber;
         private volatile object _sendLock = new object();
 
-        internal IpcClient(int portNumber)
+        private IProtocolEncryptor _encryptor;
+
+        internal IpcClient(int portNumber, IProtocolEncryptor encryptor = null)
         {
             _portNumber = portNumber;
+            _encryptor = encryptor;
         }
 
         public Task Send(IpcEntity<T> data)
@@ -31,6 +34,12 @@ namespace IpcProtocol.Core
                             socket.Connect(new IPEndPoint(IPAddress.Loopback, _portNumber));
 
                             string serializedData = JsonConvert.SerializeObject(data);
+
+                            if (_encryptor != null)
+                            {
+                                serializedData = _encryptor.Encrypt(serializedData);
+                            }
+
                             byte[] dataToSend = Encoding.UTF8.GetBytes(serializedData);
                             byte[] bufferSize = Encoding.UTF8.GetBytes(dataToSend.Length.ToString().PadLeft(4));
 

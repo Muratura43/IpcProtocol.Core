@@ -11,6 +11,8 @@ namespace IpcProtocol.Core
         private int _clientPort;
         private int _serverPort;
 
+        private IProtocolEncryptor _encryptor;
+
         private readonly IpcServer _server;
         private readonly Dictionary<int, IpcClient<T>> _multiClients;
 
@@ -19,8 +21,10 @@ namespace IpcProtocol.Core
         private Dictionary<Guid, Action<T>> _callbacks;
         private volatile object _dictionaryLock = new object();
 
-        private Protocol(int serverPort)
+        private Protocol(int serverPort, IProtocolEncryptor encryptor = null)
         {
+            _encryptor = encryptor;
+
             _serverPort = serverPort;
             _server = new IpcServer(serverPort);
 
@@ -28,13 +32,15 @@ namespace IpcProtocol.Core
             _callbacks = new Dictionary<Guid, Action<T>>();
         }
 
-        public Protocol(int clientPort, int serverPort) : this(serverPort)
+        public Protocol(int clientPort, int serverPort, IProtocolEncryptor encryptor = null) 
+            : this(serverPort, encryptor)
         {
             _multiClients.Add(clientPort, new IpcClient<T>(clientPort));
             _clientPort = clientPort;
         }
 
-        public Protocol(List<int> clientPorts, int serverPort) : this(serverPort)
+        public Protocol(List<int> clientPorts, int serverPort, IProtocolEncryptor encryptor = null) 
+            : this(serverPort, encryptor)
         {
             foreach (var port in clientPorts)
             {

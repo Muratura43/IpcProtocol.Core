@@ -12,11 +12,14 @@ namespace IpcProtocol.Core
         private const int _bufferHeaderSize = 4;
         private Socket _server;
 
+        private IProtocolEncryptor _encryptor;
+
         public event EventHandler<IpcEventArgs> OnDataReceived;
 
-        internal IpcServer(int portNumber)
+        internal IpcServer(int portNumber, IProtocolEncryptor encryptor = null)
         {
             _portNumber = portNumber;
+            _encryptor = encryptor;
         }
 
         public bool Listen()
@@ -83,7 +86,14 @@ namespace IpcProtocol.Core
                         byte[] buffer = new byte[length];
                         if (ReceiveTcp(handler, buffer, length))
                         {
-                            OnDataReceived?.Invoke(this, new IpcEventArgs(buffer));
+                            var jsonData = Encoding.UTF8.GetString(buffer);
+
+                            if (_encryptor != null)
+                            {
+                                jsonData = _encryptor.Decrypt(jsonData);
+                            }
+
+                            OnDataReceived?.Invoke(this, new IpcEventArgs(jsonData));
                         }
                     }
                 }
