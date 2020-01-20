@@ -8,23 +8,26 @@ namespace IpcProtocol.TestConsole
     {
         static void Main(string[] args)
         {
-            var protocol2 = new Protocol<Entity>(8021, 8023, new ProtocolEncryptor());
-
+            var protocol2 = new Protocol<Entity>(8021, 8022, new ProtocolEncryptor());
+            protocol2.Listen((e) =>
+            {
+                Console.WriteLine(e.Command);
+            });
             protocol2.Send(new Entity()
             {
                 Command = "test-send2",
                 Payload = null
             }).SetCallback((e) =>
             {
-                Console.WriteLine(e.Command);
+                Console.WriteLine("Callback: " + e.Command);
             });
 
-            var protocol3 = new Protocol<Entity>(8021, 8024, new ProtocolEncryptor());
-            protocol2.Send(new Entity()
-            {
-                Command = "asdf",
-                Payload = null
-            });
+            //var protocol3 = new Protocol<Entity>(8021, 8024, new ProtocolEncryptor());
+            //protocol2.Send(new Entity()
+            //{
+            //    Command = "asdf",
+            //    Payload = null
+            //});
 
             Console.ReadLine();
         }

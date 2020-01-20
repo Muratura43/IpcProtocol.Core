@@ -38,7 +38,7 @@ namespace IpcProtocol.Core
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[ERROR] IpcServer Listen: {ex?.Message}");
+                Console.WriteLine($"[ERROR] IpcServer Listen: {ex?.ToString()}");
                 return false;
             }
         }
@@ -60,7 +60,7 @@ namespace IpcProtocol.Core
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[ERROR] IpcServer OnTcpData: {ex?.Message}");
+                Console.WriteLine($"[ERROR] IpcServer OnTcpData: {ex?.ToString()}");
             }
             finally
             {
