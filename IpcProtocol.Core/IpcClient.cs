@@ -40,12 +40,19 @@ namespace IpcProtocol.Core
                             {
                                 serializedData = _encryptor.Encrypt(serializedData);
 
-                                var bufferHead = Convert.FromBase64String(serializedData).Length.ToString().PadLeft(4, '0');
-                                dataToSend = Convert.FromBase64String(bufferHead + serializedData);
+                                byte[] a = Convert.FromBase64String(serializedData);
+                                string size = a.Length.ToString().PadLeft(4, '0');
+                                byte[] sizeByte = Encoding.UTF8.GetBytes(size);
+
+                                var z = new byte[a.Length + sizeByte.Length];
+                                sizeByte.CopyTo(z, 0);
+                                a.CopyTo(z, sizeByte.Length);
+
+                                dataToSend = z;
                             }
                             else
                             {
-                                dataToSend = Encoding.UTF8.GetBytes(serializedData);
+                                dataToSend = Convert.FromBase64String(serializedData);
                             }
                             
                             socket.Client.Send(dataToSend);

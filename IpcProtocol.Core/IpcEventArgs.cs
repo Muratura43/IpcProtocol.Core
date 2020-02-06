@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 
 namespace IpcProtocol.Core
 {
@@ -13,7 +14,7 @@ namespace IpcProtocol.Core
 
         public IpcEventArgs(byte[] data)
         {
-            JsonData = Encoding.UTF8.GetString(data);
+            JsonData = Convert.ToBase64String(data);
         }
     }
 }

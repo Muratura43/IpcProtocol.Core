@@ -86,7 +86,7 @@ namespace IpcProtocol.Core
                         byte[] buffer = new byte[length];
                         if (ReceiveTcp(handler, buffer, length))
                         {
-                            var jsonData = Encoding.UTF8.GetString(buffer);
+                            var jsonData = Convert.ToBase64String(buffer);
 
                             if (_encryptor != null)
                             {
