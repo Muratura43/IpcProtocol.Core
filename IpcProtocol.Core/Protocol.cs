@@ -32,8 +32,19 @@ namespace IpcProtocol.Core
             Encoding = encoding;
 
             _encryptor = encryptor;
-            _server = new BaseIpcServer(serverPort, _encryptor);
             _callbacks = new Dictionary<Guid, Action<T>>();
+
+            switch (encoding)
+            {
+                case ProtocolEncoding.Default:
+                case ProtocolEncoding.Base64:
+                    _server = new Base64IpcServer(serverPort, _encryptor);
+                    break;
+
+                case ProtocolEncoding.UTF8:
+                    _server = new Utf8IpcServer(serverPort, _encryptor);
+                    break;
+            }
         }
 
         public Protocol(int clientPort, int serverPort, ProtocolEncoding encoding, IProtocolEncryptor encryptor = null)
@@ -41,16 +52,13 @@ namespace IpcProtocol.Core
         {
             switch (encoding)
             {
+                case ProtocolEncoding.Default:
                 case ProtocolEncoding.Base64:
                     _client = new Base64IpcClient<T>(clientPort, _encryptor);
                     break;
 
                 case ProtocolEncoding.UTF8:
                     _client = new Utf8IpcClient<T>(clientPort, _encryptor);
-                    break;
-
-                case ProtocolEncoding.Default:
-                    Console.WriteLine("Default encryption is not supported!" + Environment.NewLine + "Will create only server.");
                     break;
             }
         }
