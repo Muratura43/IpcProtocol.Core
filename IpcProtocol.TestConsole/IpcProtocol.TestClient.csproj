@@ -1,13 +1,13 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\IpcProtocol.Core\IpcProtocol.Core.csproj" />
-    <ProjectReference Include="..\IpcProtocol.Domain\IpcProtocol.Domain.csproj" />
+    <ProjectReference Include="..\IpcProtocol.TestDomain\IpcProtocol.TestDomain.csproj" />
   </ItemGroup>
 
 </Project>

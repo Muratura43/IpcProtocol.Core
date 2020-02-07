@@ -1,10 +1,11 @@
-﻿using System.Text;
+﻿using System;
 
-namespace IpcProtocol.Core
+namespace IpcProtocol.Domain
 {
-    internal class IpcEventArgs
+    public class IpcEventArgs
     {
         public string JsonData { get; set; }
+        public bool HasErrors { get; set; } = false;
 
         public IpcEventArgs(string data)
         {
@@ -13,7 +14,7 @@ namespace IpcProtocol.Core
 
         public IpcEventArgs(byte[] data)
         {
-            JsonData = Encoding.UTF8.GetString(data);
+            JsonData = Convert.ToBase64String(data);
         }
     }
 }

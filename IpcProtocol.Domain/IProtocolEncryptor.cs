@@ -1,4 +1,4 @@
-﻿namespace IpcProtocol.Core
+﻿namespace IpcProtocol.Domain
 {
     public interface IProtocolEncryptor
     {

@@ -1,22 +1,22 @@
-﻿using System;
+﻿using IpcProtocol.Domain;
+using System;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading.Tasks;
 
-namespace IpcProtocol.Core
+namespace IpcProtocol.Core.Server
 {
-    internal class IpcServer
+    internal abstract class BaseIpcServer
     {
-        private readonly int _portNumber;
-        private const int _bufferHeaderSize = 4;
-        private Socket _server;
+        protected const int _bufferHeaderSize = 4;
+        protected IProtocolEncryptor _encryptor;
 
-        private IProtocolEncryptor _encryptor;
+        private readonly int _portNumber;
+        private Socket _server;
 
         public event EventHandler<IpcEventArgs> OnDataReceived;
 
-        internal IpcServer(int portNumber, IProtocolEncryptor encryptor = null)
+        internal BaseIpcServer(int portNumber, IProtocolEncryptor encryptor = null)
         {
             _portNumber = portNumber;
             _encryptor = encryptor;
@@ -38,7 +38,7 @@ namespace IpcProtocol.Core
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[ERROR] IpcServer Listen: {ex?.ToString()}");
+                Console.Error.WriteLine($"[ERROR] IpcServer Listen: {ex?.ToString()}");
                 return false;
             }
         }
@@ -55,12 +55,16 @@ namespace IpcProtocol.Core
                     Socket handler = listener.EndAccept(ar);
                     listener.BeginAccept(new AsyncCallback(OnTcpData), listener);
                     accepted = true;
-                    Task.Factory.StartNew(() => { ProcessTcpRequest(handler); });
+
+                    Task.Factory.StartNew(() => 
+                    { 
+                        ProcessTcpRequest(handler); 
+                    });
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[ERROR] IpcServer OnTcpData: {ex?.ToString()}");
+                Console.Error.WriteLine($"[ERROR] IpcServer OnTcpData: {ex?.ToString()}");
             }
             finally
             {
@@ -71,46 +75,22 @@ namespace IpcProtocol.Core
             }
         }
 
-        private void ProcessTcpRequest(Socket handler)
-        {
-            try
-            {
-                byte[] bufferHeader = new byte[_bufferHeaderSize];
-                if (ReceiveTcp(handler, bufferHeader, _bufferHeaderSize))
-                {
-                    string slen = Encoding.UTF8.GetString(bufferHeader);
-                    int length = int.Parse(slen);
-
-                    if (length > 0)
-                    {
-                        byte[] buffer = new byte[length];
-                        if (ReceiveTcp(handler, buffer, length))
-                        {
-                            var jsonData = Encoding.UTF8.GetString(buffer);
-
-                            if (_encryptor != null)
-                            {
-                                jsonData = _encryptor.Decrypt(jsonData);
-                            }
-
-                            OnDataReceived?.Invoke(this, new IpcEventArgs(jsonData));
-                        }
-                    }
-                }
-            }
-            finally
-            {
-                handler.Disconnect(true);
-                handler.Close();
-            }
-        }
-
-        private bool ReceiveTcp(Socket handler, byte[] bufferHeader, int size,
+        protected bool ReceiveTcp(Socket handler, byte[] bufferHeader, int size,
             SocketFlags flags = SocketFlags.None, int timeout = 10000)
         {
             var asyncResult = handler.BeginReceive(bufferHeader, 0, size, flags, null, null);
             asyncResult.AsyncWaitHandle.WaitOne(timeout);
             return asyncResult.IsCompleted;
         }
+        
+        protected void InvokeDataReceived(BaseIpcServer server, IpcEventArgs args)
+        {
+            if (!args.HasErrors)
+            {
+                OnDataReceived?.Invoke(server, args);
+            }
+        }
+
+        protected abstract void ProcessTcpRequest(Socket handler);
     }
 }

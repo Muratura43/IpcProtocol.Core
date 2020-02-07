@@ -1,4 +1,7 @@
-﻿using IpcProtocol.Core.Models;
+﻿using IpcProtocol.Core.Client;
+using IpcProtocol.Core.Models;
+using IpcProtocol.Core.Server;
+using IpcProtocol.Domain;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -7,61 +10,71 @@ namespace IpcProtocol.Core
 {
     public class Protocol<T> where T : new()
     {
-        private bool _isListening = false;
-        private int _clientPort;
-        private int _serverPort;
+        public ProtocolEncoding Encoding { get; private set; }
+        public bool IsListening { get; private set; }
 
+        public delegate void OnMessageReceved(T data, Guid callbackId);
+
+        #region Fields
         private IProtocolEncryptor _encryptor;
 
-        private readonly IpcServer _server;
-        private readonly Dictionary<int, IpcClient<T>> _multiClients;
+        private readonly BaseIpcServer _server;
+        private readonly BaseIpcClient<T> _client;
 
-        private Action<T> _onMessageReceivedAction;
+        private OnMessageReceved _onMessageReceivedAction;
 
         private Dictionary<Guid, Action<T>> _callbacks;
         private volatile object _dictionaryLock = new object();
+        #endregion
 
-        private Protocol(int serverPort, IProtocolEncryptor encryptor = null)
+        private Protocol(int serverPort, ProtocolEncoding encoding, IProtocolEncryptor encryptor = null)
         {
+            Encoding = encoding;
+
             _encryptor = encryptor;
-
-            _serverPort = serverPort;
-            _server = new IpcServer(serverPort, _encryptor);
-
-            _multiClients = new Dictionary<int, IpcClient<T>>();
             _callbacks = new Dictionary<Guid, Action<T>>();
-        }
 
-        public Protocol(int clientPort, int serverPort, IProtocolEncryptor encryptor = null) 
-            : this(serverPort, encryptor)
-        {
-            _multiClients.Add(clientPort, new IpcClient<T>(clientPort, _encryptor));
-            _clientPort = clientPort;
-        }
-
-        public Protocol(List<int> clientPorts, int serverPort, IProtocolEncryptor encryptor = null) 
-            : this(serverPort, encryptor)
-        {
-            foreach (var port in clientPorts)
+            switch (encoding)
             {
-                var client = new IpcClient<T>(port, _encryptor);
-                _multiClients.Add(port, client);
+                case ProtocolEncoding.Default:
+                case ProtocolEncoding.Base64:
+                    _server = new Base64IpcServer(serverPort, _encryptor);
+                    break;
 
-                _clientPort = port;
+                case ProtocolEncoding.UTF8:
+                    _server = new Utf8IpcServer(serverPort, _encryptor);
+                    break;
             }
         }
 
-        public void Listen(Action<T> onMessageReceived)
+        public Protocol(int clientPort, int serverPort, ProtocolEncoding encoding, IProtocolEncryptor encryptor = null)
+            : this(serverPort, encoding, encryptor)
+        {
+            switch (encoding)
+            {
+                case ProtocolEncoding.Default:
+                case ProtocolEncoding.Base64:
+                    _client = new Base64IpcClient<T>(clientPort, _encryptor);
+                    break;
+
+                case ProtocolEncoding.UTF8:
+                    _client = new Utf8IpcClient<T>(clientPort, _encryptor);
+                    break;
+            }
+        }
+
+        #region Public Methods
+        public void Listen(OnMessageReceved onMessageReceived)
         {
             _onMessageReceivedAction += onMessageReceived;
             _server.OnDataReceived += Server_OnDataReceived;
 
-            if (_isListening == false)
+            if (IsListening == false)
             {
-                _isListening = _server.Listen();
+                IsListening = _server.Listen();
             }
 
-            if (_isListening == true)
+            if (IsListening == true)
             {
                 Console.WriteLine("Started listening...");
             }
@@ -69,34 +82,18 @@ namespace IpcProtocol.Core
 
         public IpcCallback<T> Send(T data)
         {
-            if (_multiClients.Count == 1)
-            {
-                var client = _multiClients[_clientPort];
-                var request = new IpcEntity<T>(data, Guid.NewGuid(), _clientPort);
-                client.Send(request);
+            var request = new IpcEntity<T>(data, Guid.NewGuid(), _client.PortNumber);
+            _client.Send(request);
 
-                return new IpcCallback<T>(this, request.Header.CallbackId);
-            }
-            else
-            {
-                throw new InvalidOperationException("Multiple clients defined. Pass the port parameter to decide which client to use.");
-            }
+            return new IpcCallback<T>(this, request.Header.CallbackId);
         }
 
-        public IpcCallback<T> Send(T data, int port)
+        public void Send(T data, Guid callbackId)
         {
-            if (_multiClients.TryGetValue(port, out IpcClient<T> client) == true)
-            {
-                var request = new IpcEntity<T>(data, Guid.NewGuid(), port);
-                client.Send(request);
-
-                return new IpcCallback<T>(this, request.Header.CallbackId);
-            }
-            else
-            {
-                throw new KeyNotFoundException("Port not found in clients list.");
-            }
+            var request = new IpcEntity<T>(data, callbackId, _client.PortNumber);
+            _client.Send(request);
         }
+        #endregion
 
         internal void AddCallback(IpcCallback<T> callback)
         {
@@ -123,7 +120,7 @@ namespace IpcProtocol.Core
             else
             {
                 // If no specific callback exists, call the generic action
-                _onMessageReceivedAction?.Invoke(entity.Entity);
+                _onMessageReceivedAction?.Invoke(entity.Entity, entity.Header.CallbackId);
             }
         }
     }

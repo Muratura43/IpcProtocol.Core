@@ -1,27 +1,22 @@
-﻿using IpcProtocol.Core.Models;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using IpcProtocol.Core.Models;
+using IpcProtocol.Domain;
+using Newtonsoft.Json;
 
-namespace IpcProtocol.Core
+namespace IpcProtocol.Core.Client
 {
-    internal class IpcClient<T> where T : new()
+    internal class Utf8IpcClient<T> : BaseIpcClient<T> where T : new()
     {
-        private readonly int _portNumber;
-        private volatile object _sendLock = new object();
-
-        private IProtocolEncryptor _encryptor;
-
-        internal IpcClient(int portNumber, IProtocolEncryptor encryptor = null)
+        internal Utf8IpcClient(int portNumber, IProtocolEncryptor encryptor = null) 
+            : base(portNumber, encryptor)
         {
-            _portNumber = portNumber;
-            _encryptor = encryptor;
         }
 
-        public Task Send(IpcEntity<T> data)
+        public override Task Send(IpcEntity<T> data)
         {
             return Task.Factory.StartNew(() =>
             {
@@ -31,7 +26,7 @@ namespace IpcProtocol.Core
                     {
                         using (TcpClient socket = new TcpClient())
                         {
-                            socket.Connect(new IPEndPoint(IPAddress.Loopback, _portNumber));
+                            socket.Connect(new IPEndPoint(IPAddress.Loopback, PortNumber));
 
                             string serializedData = JsonConvert.SerializeObject(data);
                             byte[] dataToSend;
@@ -47,7 +42,7 @@ namespace IpcProtocol.Core
                             {
                                 dataToSend = Encoding.UTF8.GetBytes(serializedData);
                             }
-                            
+
                             socket.Client.Send(dataToSend);
                             socket.Close();
                         }
@@ -55,7 +50,7 @@ namespace IpcProtocol.Core
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"[ERROR] IpcClient Send: {ex?.ToString()}");
+                    Console.Error.WriteLine($"[ERROR] IpcClient Send: {ex?.ToString()}");
                 }
             });
         }
