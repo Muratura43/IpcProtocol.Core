@@ -47,7 +47,8 @@ namespace IpcProtocol.Core.Client
                             }
                             else
                             {
-                                dataToSend = Convert.FromBase64String(serializedData);
+                                string c = serializedData.Length.ToString().PadLeft(4, '0') + serializedData;
+                                dataToSend = Encoding.UTF8.GetBytes(c);
                             }
 
                             socket.Client.Send(dataToSend);

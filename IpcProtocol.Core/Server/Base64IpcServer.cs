@@ -27,10 +27,15 @@ namespace IpcProtocol.Core.Server
                         byte[] buffer = new byte[length];
                         if (ReceiveTcp(handler, buffer, length))
                         {
-                            var jsonData = Convert.ToBase64String(buffer);
+                            string jsonData = null;
 
-                            if (_encryptor != null)
+                            if (_encryptor == null)
                             {
+                                jsonData = Encoding.UTF8.GetString(buffer);
+                            }
+                            else
+                            {
+                                jsonData = Convert.ToBase64String(buffer);
                                 jsonData = _encryptor.Decrypt(jsonData);
                             }
 
