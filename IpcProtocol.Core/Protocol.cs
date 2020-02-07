@@ -63,6 +63,7 @@ namespace IpcProtocol.Core
             }
         }
 
+        #region Public Methods
         public void Listen(OnMessageReceved onMessageReceived)
         {
             _onMessageReceivedAction += onMessageReceived;
@@ -92,6 +93,7 @@ namespace IpcProtocol.Core
             var request = new IpcEntity<T>(data, callbackId, _client.PortNumber);
             _client.Send(request);
         }
+        #endregion
 
         internal void AddCallback(IpcCallback<T> callback)
         {

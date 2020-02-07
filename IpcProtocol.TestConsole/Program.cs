@@ -9,21 +9,44 @@ namespace IpcProtocol.TestConsole
     {
         static void Main(string[] args)
         {
-            var protocol2 = new Protocol<Entity>(8021, 8022, ProtocolEncoding.Base64, new ProtocolEncryptor());
-            protocol2.Listen((e, g) =>
+            TestBase64Client();
+            TestUtf8Client();
+
+            Console.ReadLine();
+        }
+
+        static void TestBase64Client()
+        {
+            var protocol = new Protocol<Entity>(8021, 8022, ProtocolEncoding.Base64, new ProtocolEncryptor());
+            protocol.Listen((e, g) =>
             {
                 Console.WriteLine(e.Command);
             });
-            protocol2.Send(new Entity()
+            protocol.Send(new Entity()
             {
-                Command = "test-send2",
+                Command = "test-send",
                 Payload = null
             }).SetCallback((e) =>
             {
                 Console.WriteLine("Callback: " + e.Command);
             });
+        }
 
-            Console.ReadLine();
+        static void TestUtf8Client()
+        {
+            var protocol = new Protocol<Entity>(8023, 8024, ProtocolEncoding.UTF8, new ProtocolEncryptor());
+            protocol.Listen((e, g) =>
+            {
+                Console.WriteLine(e.Command);
+            });
+            protocol.Send(new Entity()
+            {
+                Command = "test-send",
+                Payload = null
+            }).SetCallback((e) =>
+            {
+                Console.WriteLine("Callback: " + e.Command);
+            });
         }
     }
 

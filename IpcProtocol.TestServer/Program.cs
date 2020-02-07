@@ -9,9 +9,15 @@ namespace IpcProtocol.TestServer
     {
         static void Main(string[] args)
         {
-            var protocol = new Protocol<Entity>(8022, 8021, ProtocolEncoding.Base64, new ProtocolEncryptor());
+            TestBase64Server();
+            TestUtf8Server();
 
-            // Listen test
+            Console.ReadLine();
+        }
+
+        static void TestBase64Server()
+        {
+            var protocol = new Protocol<Entity>(8022, 8021, ProtocolEncoding.Base64, new ProtocolEncryptor());
             protocol.Listen((e, g) =>
             {
                 Console.WriteLine("Received: " + e.Command);
@@ -21,8 +27,20 @@ namespace IpcProtocol.TestServer
                     Payload = null
                 }, g);
             });
+        }
 
-            Console.ReadLine();
+        static void TestUtf8Server()
+        {
+            var protocol = new Protocol<Entity>(8024, 8023, ProtocolEncoding.UTF8, new ProtocolEncryptor());
+            protocol.Listen((e, g) =>
+            {
+                Console.WriteLine("Received: " + e.Command);
+                protocol.Send(new Entity()
+                {
+                    Command = "test-callback",
+                    Payload = null
+                }, g);
+            });
         }
     }
 
