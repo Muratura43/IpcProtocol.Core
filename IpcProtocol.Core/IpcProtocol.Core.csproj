@@ -13,7 +13,7 @@
     <PackageLicenseUrl>https://github.com/Muratura43/IpcProtocol.Core/blob/master/LICENSE</PackageLicenseUrl>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>ipcprotocol.core.snk</AssemblyOriginatorKeyFile>
-    <Version>1.1.1</Version>
+    <Version>1.1.2</Version>
     <NeutralLanguage>en</NeutralLanguage>
   </PropertyGroup>
 

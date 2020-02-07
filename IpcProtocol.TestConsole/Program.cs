@@ -10,7 +10,7 @@ namespace IpcProtocol.TestConsole
         static void Main(string[] args)
         {
             TestBase64Client();
-            //TestUtf8Client();
+            TestUtf8Client();
 
             Console.ReadLine();
         }
