@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <Authors>Muratura43</Authors>
     <Company>Heimdal Security</Company>
     <Product />
@@ -13,7 +13,7 @@
     <PackageLicenseUrl>https://github.com/Muratura43/IpcProtocol.Core/blob/master/LICENSE</PackageLicenseUrl>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>ipcprotocol.core.snk</AssemblyOriginatorKeyFile>
-    <Version>1.0.6</Version>
+    <Version>1.1.0</Version>
     <NeutralLanguage>en</NeutralLanguage>
   </PropertyGroup>
 
