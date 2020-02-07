@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Text;
 
-namespace IpcProtocol.Core
+namespace IpcProtocol.Domain
 {
-    internal class IpcEventArgs
+    public class IpcEventArgs
     {
         public string JsonData { get; set; }
 

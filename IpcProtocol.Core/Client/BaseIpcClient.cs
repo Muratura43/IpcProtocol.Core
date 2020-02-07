@@ -1,4 +1,5 @@
 ﻿using IpcProtocol.Core.Models;
+using IpcProtocol.Domain;
 using Newtonsoft.Json;
 using System;
 using System.Net;
@@ -6,22 +7,22 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IpcProtocol.Core
+namespace IpcProtocol.Core.Client
 {
-    internal class IpcClient<T> where T : new()
+    internal class BaseIpcClient<T> where T : new()
     {
         private readonly int _portNumber;
         private volatile object _sendLock = new object();
 
         private IProtocolEncryptor _encryptor;
 
-        internal IpcClient(int portNumber, IProtocolEncryptor encryptor = null)
+        internal BaseIpcClient(int portNumber, IProtocolEncryptor encryptor = null)
         {
             _portNumber = portNumber;
             _encryptor = encryptor;
         }
 
-        public Task Send(IpcEntity<T> data)
+        public virtual Task Send(IpcEntity<T> data)
         {
             return Task.Factory.StartNew(() =>
             {

@@ -1,12 +1,13 @@
-﻿using System;
+﻿using IpcProtocol.Domain;
+using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IpcProtocol.Core
+namespace IpcProtocol.Core.Server
 {
-    internal class IpcServer
+    internal class BaseIpcServer
     {
         private readonly int _portNumber;
         private const int _bufferHeaderSize = 4;
@@ -16,7 +17,7 @@ namespace IpcProtocol.Core
 
         public event EventHandler<IpcEventArgs> OnDataReceived;
 
-        internal IpcServer(int portNumber, IProtocolEncryptor encryptor = null)
+        internal BaseIpcServer(int portNumber, IProtocolEncryptor encryptor = null)
         {
             _portNumber = portNumber;
             _encryptor = encryptor;

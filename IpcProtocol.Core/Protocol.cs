@@ -1,4 +1,7 @@
-﻿using IpcProtocol.Core.Models;
+﻿using IpcProtocol.Core.Client;
+using IpcProtocol.Core.Models;
+using IpcProtocol.Core.Server;
+using IpcProtocol.Domain;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -9,12 +12,11 @@ namespace IpcProtocol.Core
     {
         private bool _isListening = false;
         private int _clientPort;
-        private int _serverPort;
 
         private IProtocolEncryptor _encryptor;
 
-        private readonly IpcServer _server;
-        private readonly Dictionary<int, IpcClient<T>> _multiClients;
+        private readonly BaseIpcServer _server;
+        private readonly Dictionary<int, BaseIpcClient<T>> _multiClients;
 
         private Action<T> _onMessageReceivedAction;
 
@@ -25,17 +27,16 @@ namespace IpcProtocol.Core
         {
             _encryptor = encryptor;
 
-            _serverPort = serverPort;
-            _server = new IpcServer(serverPort, _encryptor);
+            _server = new BaseIpcServer(serverPort, _encryptor);
 
-            _multiClients = new Dictionary<int, IpcClient<T>>();
+            _multiClients = new Dictionary<int, BaseIpcClient<T>>();
             _callbacks = new Dictionary<Guid, Action<T>>();
         }
 
         public Protocol(int clientPort, int serverPort, IProtocolEncryptor encryptor = null) 
             : this(serverPort, encryptor)
         {
-            _multiClients.Add(clientPort, new IpcClient<T>(clientPort, _encryptor));
+            _multiClients.Add(clientPort, new BaseIpcClient<T>(clientPort, _encryptor));
             _clientPort = clientPort;
         }
 
@@ -44,7 +45,7 @@ namespace IpcProtocol.Core
         {
             foreach (var port in clientPorts)
             {
-                var client = new IpcClient<T>(port, _encryptor);
+                var client = new BaseIpcClient<T>(port, _encryptor);
                 _multiClients.Add(port, client);
 
                 _clientPort = port;
@@ -85,7 +86,7 @@ namespace IpcProtocol.Core
 
         public IpcCallback<T> Send(T data, int port)
         {
-            if (_multiClients.TryGetValue(port, out IpcClient<T> client) == true)
+            if (_multiClients.TryGetValue(port, out BaseIpcClient<T> client) == true)
             {
                 var request = new IpcEntity<T>(data, Guid.NewGuid(), port);
                 client.Send(request);
