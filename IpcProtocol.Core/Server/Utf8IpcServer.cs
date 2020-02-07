@@ -1,4 +1,5 @@
-﻿using System.Net.Sockets;
+﻿using System;
+using System.Net.Sockets;
 using System.Text;
 using IpcProtocol.Domain;
 
@@ -37,6 +38,11 @@ namespace IpcProtocol.Core.Server
                         }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine("[ERROR] IpcServer process request: " + ex.ToString());
+                InvokeDataReceived(this, new IpcEventArgs(ex.Message) { HasErrors = true });
             }
             finally
             {

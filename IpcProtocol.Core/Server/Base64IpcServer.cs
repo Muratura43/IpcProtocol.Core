@@ -39,6 +39,11 @@ namespace IpcProtocol.Core.Server
                     }
                 }
             }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine("[ERROR] IpcServer process request: " + ex.ToString());
+                InvokeDataReceived(this, new IpcEventArgs(ex.Message) { HasErrors = true });
+            }
             finally
             {
                 handler.Disconnect(true);

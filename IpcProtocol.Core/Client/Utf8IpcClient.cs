@@ -50,7 +50,7 @@ namespace IpcProtocol.Core.Client
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"[ERROR] IpcClient Send: {ex?.ToString()}");
+                    Console.Error.WriteLine($"[ERROR] IpcClient Send: {ex?.ToString()}");
                 }
             });
         }

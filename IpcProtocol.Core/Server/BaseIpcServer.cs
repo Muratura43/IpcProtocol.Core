@@ -2,7 +2,6 @@
 using System;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace IpcProtocol.Core.Server
@@ -39,7 +38,7 @@ namespace IpcProtocol.Core.Server
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[ERROR] IpcServer Listen: {ex?.ToString()}");
+                Console.Error.WriteLine($"[ERROR] IpcServer Listen: {ex?.ToString()}");
                 return false;
             }
         }
@@ -65,7 +64,7 @@ namespace IpcProtocol.Core.Server
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[ERROR] IpcServer OnTcpData: {ex?.ToString()}");
+                Console.Error.WriteLine($"[ERROR] IpcServer OnTcpData: {ex?.ToString()}");
             }
             finally
             {
@@ -86,7 +85,10 @@ namespace IpcProtocol.Core.Server
         
         protected void InvokeDataReceived(BaseIpcServer server, IpcEventArgs args)
         {
-            OnDataReceived?.Invoke(server, args);
+            if (!args.HasErrors)
+            {
+                OnDataReceived?.Invoke(server, args);
+            }
         }
 
         protected abstract void ProcessTcpRequest(Socket handler);

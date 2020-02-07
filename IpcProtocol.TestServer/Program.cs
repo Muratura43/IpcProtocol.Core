@@ -1,6 +1,6 @@
 ﻿using IpcProtocol.Core;
 using IpcProtocol.Core.Models;
-using IpcProtocol.Domain;
+using IpcProtocol.TestDomain;
 using System;
 
 namespace IpcProtocol.TestServer

@@ -1,9 +1,10 @@
-﻿using System;
+﻿using IpcProtocol.Domain;
+using System;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 
-namespace IpcProtocol.Domain
+namespace IpcProtocol.TestDomain
 {
     public class ProtocolEncryptor : IProtocolEncryptor
     {
@@ -14,7 +15,7 @@ namespace IpcProtocol.Domain
         {
             byte[] encrypted = null;
             string result = null;
-            
+
             var key = StringToByteArray(Key);
             var iv = StringToByteArray(IV);
 
