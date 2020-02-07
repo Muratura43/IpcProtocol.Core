@@ -9,7 +9,7 @@ namespace IpcProtocol.TestConsole
         static void Main(string[] args)
         {
             var protocol2 = new Protocol<Entity>(8021, 8022, new ProtocolEncryptor());
-            protocol2.Listen((e) =>
+            protocol2.Listen((e, g) =>
             {
                 Console.WriteLine(e.Command);
             });
@@ -21,13 +21,6 @@ namespace IpcProtocol.TestConsole
             {
                 Console.WriteLine("Callback: " + e.Command);
             });
-
-            //var protocol3 = new Protocol<Entity>(8021, 8024, new ProtocolEncryptor());
-            //protocol2.Send(new Entity()
-            //{
-            //    Command = "asdf",
-            //    Payload = null
-            //});
 
             Console.ReadLine();
         }

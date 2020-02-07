@@ -10,49 +10,34 @@ namespace IpcProtocol.Core
 {
     public class Protocol<T> where T : new()
     {
+        #region Fields
         private bool _isListening = false;
-        private int _clientPort;
 
         private IProtocolEncryptor _encryptor;
 
         private readonly BaseIpcServer _server;
-        private readonly Dictionary<int, BaseIpcClient<T>> _multiClients;
+        private readonly BaseIpcClient<T> _client;
 
-        private Action<T> _onMessageReceivedAction;
+        private OnMessageReceved _onMessageReceivedAction;
 
         private Dictionary<Guid, Action<T>> _callbacks;
         private volatile object _dictionaryLock = new object();
+        #endregion
 
         private Protocol(int serverPort, IProtocolEncryptor encryptor = null)
         {
             _encryptor = encryptor;
-
             _server = new BaseIpcServer(serverPort, _encryptor);
-
-            _multiClients = new Dictionary<int, BaseIpcClient<T>>();
             _callbacks = new Dictionary<Guid, Action<T>>();
         }
 
-        public Protocol(int clientPort, int serverPort, IProtocolEncryptor encryptor = null) 
+        public Protocol(int clientPort, int serverPort, IProtocolEncryptor encryptor = null)
             : this(serverPort, encryptor)
         {
-            _multiClients.Add(clientPort, new BaseIpcClient<T>(clientPort, _encryptor));
-            _clientPort = clientPort;
+            _client = new BaseIpcClient<T>(clientPort, _encryptor);
         }
 
-        public Protocol(List<int> clientPorts, int serverPort, IProtocolEncryptor encryptor = null) 
-            : this(serverPort, encryptor)
-        {
-            foreach (var port in clientPorts)
-            {
-                var client = new BaseIpcClient<T>(port, _encryptor);
-                _multiClients.Add(port, client);
-
-                _clientPort = port;
-            }
-        }
-
-        public void Listen(Action<T> onMessageReceived)
+        public void Listen(OnMessageReceved onMessageReceived)
         {
             _onMessageReceivedAction += onMessageReceived;
             _server.OnDataReceived += Server_OnDataReceived;
@@ -70,33 +55,16 @@ namespace IpcProtocol.Core
 
         public IpcCallback<T> Send(T data)
         {
-            if (_multiClients.Count == 1)
-            {
-                var client = _multiClients[_clientPort];
-                var request = new IpcEntity<T>(data, Guid.NewGuid(), _clientPort);
-                client.Send(request);
+            var request = new IpcEntity<T>(data, Guid.NewGuid(), _client.PortNumber);
+            _client.Send(request);
 
-                return new IpcCallback<T>(this, request.Header.CallbackId);
-            }
-            else
-            {
-                throw new InvalidOperationException("Multiple clients defined. Pass the port parameter to decide which client to use.");
-            }
+            return new IpcCallback<T>(this, request.Header.CallbackId);
         }
 
-        public IpcCallback<T> Send(T data, int port)
+        public void Send(T data, Guid callbackId)
         {
-            if (_multiClients.TryGetValue(port, out BaseIpcClient<T> client) == true)
-            {
-                var request = new IpcEntity<T>(data, Guid.NewGuid(), port);
-                client.Send(request);
-
-                return new IpcCallback<T>(this, request.Header.CallbackId);
-            }
-            else
-            {
-                throw new KeyNotFoundException("Port not found in clients list.");
-            }
+            var request = new IpcEntity<T>(data, callbackId, _client.PortNumber);
+            _client.Send(request);
         }
 
         internal void AddCallback(IpcCallback<T> callback)
@@ -124,8 +92,10 @@ namespace IpcProtocol.Core
             else
             {
                 // If no specific callback exists, call the generic action
-                _onMessageReceivedAction?.Invoke(entity.Entity);
+                _onMessageReceivedAction?.Invoke(entity.Entity, entity.Header.CallbackId);
             }
         }
+
+        public delegate void OnMessageReceved(T data, Guid callbackId);
     }
 }

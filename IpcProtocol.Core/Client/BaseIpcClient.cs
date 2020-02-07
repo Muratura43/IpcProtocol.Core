@@ -11,14 +11,14 @@ namespace IpcProtocol.Core.Client
 {
     internal class BaseIpcClient<T> where T : new()
     {
-        private readonly int _portNumber;
-        private volatile object _sendLock = new object();
+        public int PortNumber { get; private set; }
 
+        private volatile object _sendLock = new object();
         private IProtocolEncryptor _encryptor;
 
         internal BaseIpcClient(int portNumber, IProtocolEncryptor encryptor = null)
         {
-            _portNumber = portNumber;
+            PortNumber = portNumber;
             _encryptor = encryptor;
         }
 
@@ -32,7 +32,7 @@ namespace IpcProtocol.Core.Client
                     {
                         using (TcpClient socket = new TcpClient())
                         {
-                            socket.Connect(new IPEndPoint(IPAddress.Loopback, _portNumber));
+                            socket.Connect(new IPEndPoint(IPAddress.Loopback, PortNumber));
 
                             string serializedData = JsonConvert.SerializeObject(data);
                             byte[] dataToSend;

@@ -11,9 +11,14 @@ namespace IpcProtocol.TestServer
             var protocol = new Protocol<Entity>(8022, 8021, new ProtocolEncryptor());
 
             // Listen test
-            protocol.Listen((e) =>
+            protocol.Listen((e, g) =>
             {
                 Console.WriteLine("Received: " + e.Command);
+                protocol.Send(new Entity()
+                {
+                    Command = "test-callback",
+                    Payload = null
+                }, g);
             });
 
             Console.ReadLine();
