@@ -2,7 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Version>1.1.0</Version>
+    <Version>1.1.1</Version>
+    <Authors>Muratura43</Authors>
+    <Company>Heimdal Security</Company>
+    <Description>Provides a simple IPC over TCP</Description>
+    <RepositoryUrl>https://github.com/Muratura43/IpcProtocol.Core</RepositoryUrl>
+    <RepositoryType>GitHub</RepositoryType>
+    <PackageTags>ipc protocol tcp encoding encryption communication</PackageTags>
+    <NeutralLanguage>English</NeutralLanguage>
   </PropertyGroup>
 
 </Project>

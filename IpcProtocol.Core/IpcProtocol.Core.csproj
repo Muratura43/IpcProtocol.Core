@@ -9,11 +9,11 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <RepositoryUrl>https://github.com/Muratura43/IpcProtocol.Core</RepositoryUrl>
     <RepositoryType>GitHub</RepositoryType>
-    <PackageTags>ipc protocol tcp</PackageTags>
+    <PackageTags>ipc protocol tcp encoding encryption communication</PackageTags>
     <PackageLicenseUrl>https://github.com/Muratura43/IpcProtocol.Core/blob/master/LICENSE</PackageLicenseUrl>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>ipcprotocol.core.snk</AssemblyOriginatorKeyFile>
-    <Version>1.1.0</Version>
+    <Version>1.1.1</Version>
     <NeutralLanguage>en</NeutralLanguage>
   </PropertyGroup>
 
