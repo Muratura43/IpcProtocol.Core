@@ -10,9 +10,12 @@ namespace IpcProtocol.Core
 {
     public class Protocol<T> where T : new()
     {
-        #region Fields
-        private bool _isListening = false;
+        public ProtocolEncoding Encoding { get; private set; }
+        public bool IsListening { get; private set; }
 
+        public delegate void OnMessageReceved(T data, Guid callbackId);
+
+        #region Fields
         private IProtocolEncryptor _encryptor;
 
         private readonly BaseIpcServer _server;
@@ -24,17 +27,32 @@ namespace IpcProtocol.Core
         private volatile object _dictionaryLock = new object();
         #endregion
 
-        private Protocol(int serverPort, IProtocolEncryptor encryptor = null)
+        private Protocol(int serverPort, ProtocolEncoding encoding, IProtocolEncryptor encryptor = null)
         {
+            Encoding = encoding;
+
             _encryptor = encryptor;
             _server = new BaseIpcServer(serverPort, _encryptor);
             _callbacks = new Dictionary<Guid, Action<T>>();
         }
 
-        public Protocol(int clientPort, int serverPort, IProtocolEncryptor encryptor = null)
-            : this(serverPort, encryptor)
+        public Protocol(int clientPort, int serverPort, ProtocolEncoding encoding, IProtocolEncryptor encryptor = null)
+            : this(serverPort, encoding, encryptor)
         {
-            _client = new BaseIpcClient<T>(clientPort, _encryptor);
+            switch (encoding)
+            {
+                case ProtocolEncoding.Base64:
+                    _client = new Base64IpcClient<T>(clientPort, _encryptor);
+                    break;
+
+                case ProtocolEncoding.UTF8:
+                    _client = new Utf8IpcClient<T>(clientPort, _encryptor);
+                    break;
+
+                case ProtocolEncoding.Default:
+                    Console.WriteLine("Default encryption is not supported!" + Environment.NewLine + "Will create only server.");
+                    break;
+            }
         }
 
         public void Listen(OnMessageReceved onMessageReceived)
@@ -42,12 +60,12 @@ namespace IpcProtocol.Core
             _onMessageReceivedAction += onMessageReceived;
             _server.OnDataReceived += Server_OnDataReceived;
 
-            if (_isListening == false)
+            if (IsListening == false)
             {
-                _isListening = _server.Listen();
+                IsListening = _server.Listen();
             }
 
-            if (_isListening == true)
+            if (IsListening == true)
             {
                 Console.WriteLine("Started listening...");
             }
@@ -95,7 +113,5 @@ namespace IpcProtocol.Core
                 _onMessageReceivedAction?.Invoke(entity.Entity, entity.Header.CallbackId);
             }
         }
-
-        public delegate void OnMessageReceved(T data, Guid callbackId);
     }
 }

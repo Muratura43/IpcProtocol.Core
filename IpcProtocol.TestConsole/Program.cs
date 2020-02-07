@@ -1,5 +1,6 @@
 ﻿using System;
 using IpcProtocol.Core;
+using IpcProtocol.Core.Models;
 using IpcProtocol.Domain;
 
 namespace IpcProtocol.TestConsole
@@ -8,7 +9,7 @@ namespace IpcProtocol.TestConsole
     {
         static void Main(string[] args)
         {
-            var protocol2 = new Protocol<Entity>(8021, 8022, new ProtocolEncryptor());
+            var protocol2 = new Protocol<Entity>(8021, 8022, ProtocolEncoding.Base64, new ProtocolEncryptor());
             protocol2.Listen((e, g) =>
             {
                 Console.WriteLine(e.Command);
